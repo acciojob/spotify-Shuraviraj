@@ -139,6 +139,7 @@ public class SpotifyRepository {
             return playlist;
         }
         playlistListenerMap.get(playlist).add(user);
+        userPlaylistMap.get(user).add(playlist);
         return playlist;
     }
 
