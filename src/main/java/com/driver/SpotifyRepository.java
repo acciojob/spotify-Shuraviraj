@@ -40,27 +40,34 @@ public class SpotifyRepository {
     public User createUser(String name, String mobile) {
         User user = new User(name, mobile);
         users.add(user);
+        if (!creatorPlaylistMap.containsKey(user)) {
+            creatorPlaylistMap.put(user, null);
+        }
+        if (!userPlaylistMap.containsKey(user)) {
+            userPlaylistMap.put(user, new ArrayList<>());
+        }
         return user;
     }
 
     public Artist createArtist(String name) {
         Artist artist = new Artist(name);
         artists.add(artist);
+        if (!artistAlbumMap.containsKey(artist)) {
+            artistAlbumMap.put(artist, new ArrayList<>());
+        }
         return artist;
     }
 
     public Album createAlbum(String title, String artistName) {
         Artist artist = artists.stream()
-                .filter(a -> a.getName().equals(artistName))
-                .findFirst()
-                .orElse(null);
+                .filter(a -> a.getName().equals(artistName)).findFirst().orElse(null);
         if (artist == null) {
             artist = createArtist(artistName);
         }
         Album album = new Album(title);
         albums.add(album);
-        if (!artistAlbumMap.containsKey(artist)) {
-            artistAlbumMap.put(artist, new ArrayList<>());
+        if (!albumSongMap.containsKey(album)) {
+            albumSongMap.put(album, new ArrayList<>());
         }
         artistAlbumMap.get(artist).add(album);
         return album;
@@ -73,10 +80,9 @@ public class SpotifyRepository {
                 .orElseThrow(() -> new Exception("Album does not exist"));
 
         Song song = new Song(title, length);
-        song.setLikes(0);
         songs.add(song);
-        if (!albumSongMap.containsKey(album)) {
-            albumSongMap.put(album, new ArrayList<>());
+        if (!songLikeMap.containsKey(song)) {
+            songLikeMap.put(song, new ArrayList<>());
         }
         albumSongMap.get(album).add(song);
         return song;
@@ -89,19 +95,14 @@ public class SpotifyRepository {
                 .orElseThrow(() -> new Exception("User does not exist"));
         Playlist playlist = new Playlist(title);
         playlists.add(playlist);
+        playlistListenerMap.put(playlist, new ArrayList<>());
         playlistSongMap.put(playlist, new ArrayList<>());
+
         songs.stream()
                 .filter(a -> a.getLength() == length)
                 .forEach(a -> playlistSongMap.get(playlist).add(a));
-
-        playlistListenerMap.put(playlist, new ArrayList<>());
-        playlistListenerMap.get(playlist).add(user);
-
         creatorPlaylistMap.put(user, playlist);
-
-        if (!userPlaylistMap.containsKey(user)) {
-            userPlaylistMap.put(user, new ArrayList<>());
-        }
+        playlistListenerMap.get(playlist).add(user);
         userPlaylistMap.get(user).add(playlist);
         return playlist;
     }
@@ -113,20 +114,13 @@ public class SpotifyRepository {
                 .orElseThrow(() -> new Exception("User does not exist"));
         Playlist playlist = new Playlist(title);
         playlists.add(playlist);
-
+        playlistListenerMap.put(playlist, new ArrayList<>());
         playlistSongMap.put(playlist, new ArrayList<>());
         songs.stream()
                 .filter(a -> songTitles.contains(a.getTitle()))
                 .forEach(a -> playlistSongMap.get(playlist).add(a));
-
         creatorPlaylistMap.put(user, playlist);
-
-        playlistListenerMap.put(playlist, new ArrayList<>());
         playlistListenerMap.get(playlist).add(user);
-
-        if (!userPlaylistMap.containsKey(user)) {
-            userPlaylistMap.put(user, new ArrayList<>());
-        }
         userPlaylistMap.get(user).add(playlist);
         return playlist;
     }
@@ -141,16 +135,10 @@ public class SpotifyRepository {
                 .filter(a -> a.getMobile().equals(mobile))
                 .findFirst()
                 .orElseThrow(() -> new Exception("User does not exist"));
-
-        if (creatorPlaylistMap.containsKey(user)) {
+        if (creatorPlaylistMap.containsKey(user) || playlistListenerMap.get(playlist).contains(user)) {
             return playlist;
         }
-        if (playlistListenerMap.containsKey(playlist) && playlistListenerMap.get(playlist).contains(user)) {
-            return playlist;
-        }
-        if (playlistListenerMap.containsKey(playlist)) {
-            playlistListenerMap.get(playlist).add(user);
-        }
+        playlistListenerMap.get(playlist).add(user);
         return playlist;
     }
 
@@ -163,11 +151,6 @@ public class SpotifyRepository {
                 .filter(a -> a.getTitle().equals(songTitle))
                 .findFirst()
                 .orElseThrow(() -> new Exception("Song does not exist"));
-
-        if (!songLikeMap.containsKey(song)) {
-            songLikeMap.put(song, new ArrayList<>());
-        }
-
         if (!songLikeMap.get(song).contains(user)) {
             song.setLikes(song.getLikes() + 1);
             songLikeMap.get(song).add(user);
@@ -175,7 +158,7 @@ public class SpotifyRepository {
             return song;
         }
         Album album = null;
-        for (Album a : albumSongMap.keySet()) {
+        for (var a : albumSongMap.keySet()) {
             if (albumSongMap.get(a).contains(song)) {
                 album = a;
                 break;
@@ -188,8 +171,7 @@ public class SpotifyRepository {
                 break;
             }
         }
-        if (artist != null) artist.setLikes(artist.getLikes() + 1);
-
+        artist.setLikes(artist.getLikes() + 1);
         return song;
     }
 
@@ -197,13 +179,13 @@ public class SpotifyRepository {
         int like = -1;
         Artist artist = null;
         for (Artist a : artists) {
-            if (a.getLikes() >= like) {
+            if (a.getLikes() > like) {
                 like = a.getLikes();
                 artist = a;
             }
         }
 
-        return artist == null ? null : artist.getName();
+        return artist.getName();
     }
 
     public String mostPopularSong() {
@@ -215,6 +197,6 @@ public class SpotifyRepository {
                 song = s;
             }
         }
-        return song == null ? null : song.getTitle();
+        return song.getTitle();
     }
 }
