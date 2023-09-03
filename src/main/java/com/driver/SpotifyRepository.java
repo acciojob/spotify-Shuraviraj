@@ -188,7 +188,7 @@ public class SpotifyRepository {
             }
          }
 
-        return artist.getName() + like;
+        return artist.getName();
     }
 
     public String mostPopularSong() {
@@ -200,6 +200,6 @@ public class SpotifyRepository {
                 song = s;
             }
         }
-        return song.getTitle() + like;
+        return song.getTitle();
     }
 }
