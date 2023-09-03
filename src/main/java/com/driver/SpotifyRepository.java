@@ -124,13 +124,12 @@ public class SpotifyRepository {
                 .filter(a -> a.getMobile().equals(mobile))
                 .findFirst()
                 .orElseThrow(() -> new Exception("User does not exist"));
+
+        if (playlistListenerMap.containsKey(playlist) && (!playlistListenerMap.get(playlist).contains(user))) {
+            playlistListenerMap.get(playlist).add(user);
+        }
         if (creatorPlaylistMap.containsKey(user)) {
             return playlist;
-        }
-        if (playlistListenerMap.containsKey(playlist)) {
-            if (!playlistListenerMap.get(playlist).contains(user)) {
-                playlistListenerMap.get(playlist).add(user);
-            }
         }
         return playlist;
     }
