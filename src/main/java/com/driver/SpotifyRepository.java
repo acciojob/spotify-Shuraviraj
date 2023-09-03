@@ -98,9 +98,11 @@ public class SpotifyRepository {
         playlistListenerMap.put(playlist, new ArrayList<>());
         playlistSongMap.put(playlist, new ArrayList<>());
 
-        songs.stream()
-                .filter(a -> a.getLength() == length)
-                .forEach(a -> playlistSongMap.get(playlist).add(a));
+        for (Song s : songs) {
+            if (s.getLength() == length) {
+                playlistSongMap.get(playlist).add(s);
+            }
+        }
         creatorPlaylistMap.put(user, playlist);
         playlistListenerMap.get(playlist).add(user);
         userPlaylistMap.get(user).add(playlist);
@@ -116,9 +118,11 @@ public class SpotifyRepository {
         playlists.add(playlist);
         playlistListenerMap.put(playlist, new ArrayList<>());
         playlistSongMap.put(playlist, new ArrayList<>());
-        songs.stream()
-                .filter(a -> songTitles.contains(a.getTitle()))
-                .forEach(a -> playlistSongMap.get(playlist).add(a));
+        for (Song s : songs) {
+            if (songTitles.contains(s.getTitle())) {
+                playlistSongMap.get(playlist).add(s);
+            }
+        }
         creatorPlaylistMap.put(user, playlist);
         playlistListenerMap.get(playlist).add(user);
         userPlaylistMap.get(user).add(playlist);
