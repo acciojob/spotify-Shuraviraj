@@ -154,8 +154,8 @@ public class SpotifyRepository {
                 .filter(a -> a.getTitle().equals(songTitle))
                 .findFirst()
                 .orElseThrow(() -> new Exception("Song does not exist"));
-        song.setLikes(song.getLikes()+1);
         if (!songLikeMap.get(song).contains(user)) {
+        song.setLikes(song.getLikes()+1);
             songLikeMap.get(song).add(user);
         }
         Album album = null;
