@@ -145,10 +145,12 @@ public class SpotifyRepository {
         if (creatorPlaylistMap.containsKey(user)) {
             return playlist;
         }
-        if (playlistListenerMap.get(playlist).contains(user)) {
+        if (playlistListenerMap.containsKey(playlist) && playlistListenerMap.get(playlist).contains(user)) {
             return playlist;
         }
-        playlistListenerMap.get(playlist).add(user);
+        if (playlistListenerMap.containsKey(playlist)) {
+            playlistListenerMap.get(playlist).add(user);
+        }
         return playlist;
     }
 
@@ -187,7 +189,7 @@ public class SpotifyRepository {
             }
         }
         if (artist != null) artist.setLikes(artist.getLikes() + 1);
-        
+
         return song;
     }
 
