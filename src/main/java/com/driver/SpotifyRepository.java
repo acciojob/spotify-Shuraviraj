@@ -186,7 +186,8 @@ public class SpotifyRepository {
                 break;
             }
         }
-        artist.setLikes(artist.getLikes() + 1);
+        if (artist != null) artist.setLikes(artist.getLikes() + 1);
+        
         return song;
     }
 
